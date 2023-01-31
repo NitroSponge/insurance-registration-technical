@@ -25,6 +25,7 @@ public class RegistrationController : ControllerBase
         {
             FirstName = "TestFirst",
             Surname = "TestLast",
+            PolicyReferenceNumber = "TestRefNum"
         });
         await _databaseContext.SaveChangesAsync(cancellationToken);
         var savedUsers = await _databaseContext.Users.ToListAsync(cancellationToken);
