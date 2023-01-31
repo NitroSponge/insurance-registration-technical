@@ -2,13 +2,13 @@
 
 public class RegisterUserRequestModel
 {
-    public string FirstName { get; init; } = default!;
+    public string FirstName { get; set; } = default!;
 
-    public string Surname { get; init; } = default!;
+    public string Surname { get; set; } = default!;
 
-    public string PolicyReferenceNumber { get; init; } = default!;
+    public string PolicyReferenceNumber { get; set; } = default!;
 
-    public DateOnly? DateOfBirth { get; init; }
+    public DateOnly? DateOfBirth { get; set; }
 
-    public string? Email { get; init; }
+    public string? Email { get; set; }
 }
