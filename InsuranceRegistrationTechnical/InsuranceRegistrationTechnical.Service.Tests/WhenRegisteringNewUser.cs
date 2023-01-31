@@ -1,10 +1,13 @@
 using AutoFixture;
 using FluentAssertions;
 using InsuranceRegistrationTechnical.Data.Interfaces;
+using InsuranceRegistrationTechnical.Service.Configuration;
+using InsuranceRegistrationTechnical.Service.Interfaces;
 using InsuranceRegistrationTechnical.Service.Models;
 using InsuranceRegistrationTechnical.Service.Services;
 using InsuranceRegistrationTechnical.Service.Tools;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace InsuranceRegistrationTechnical.Service.Tests;
@@ -14,15 +17,19 @@ public class WhenRegisteringNewUser
     private UserRegistrationService Service { get; set; }
     private Mock<ILogger<UserRegistrationService>> MockLogger { get; set; }
     private Mock<IUserRepository> MockUserRepository { get; set; }
+    private Mock<IAgeRestrictionEvaluator> MockAgeRestrictionEvaluator { get; set; }
     private RegisterUserRequestModel Request { get; set; }
     private ServiceResult<int> Result { get; set; }
 
+    // In my previous workplaces, frameworks have existed for auto-handling DI in tests. I am unsure how to do this myself without further reading.
     [SetUp]
     public void Setup()
     {
         MockLogger = new Mock<ILogger<UserRegistrationService>>();
         MockUserRepository = new Mock<IUserRepository>();
-        Service = new UserRegistrationService(MockLogger.Object, MockUserRepository.Object);
+        MockAgeRestrictionEvaluator = new Mock<IAgeRestrictionEvaluator>();
+        var options = Options.Create(new UserRegistrationServiceOptions());
+        Service = new UserRegistrationService(MockLogger.Object, MockUserRepository.Object, MockAgeRestrictionEvaluator.Object, options);
         Request = null!;
         Result = null!;
     }
