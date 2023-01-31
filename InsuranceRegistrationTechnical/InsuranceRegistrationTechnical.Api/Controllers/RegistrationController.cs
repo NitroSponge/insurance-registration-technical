@@ -1,3 +1,4 @@
+using InsuranceRegistrationTechnical.Api.Dtos;
 using InsuranceRegistrationTechnical.Data.Data;
 using InsuranceRegistrationTechnical.Data.Entities;
 using InsuranceRegistrationTechnical.Data.Interfaces;
@@ -20,14 +21,14 @@ public class RegistrationController : ControllerBase
         _userRepository = userRepository;
     }
 
-    [HttpPost(Name = "PostCreateUserRequest")]
-    public async Task<int> PostCreateUserRequest(CancellationToken cancellationToken)
+    [HttpPost(Name = "PostRegisterUserRequest")]
+    public async Task<int> PostRegisterUserRequest([FromBody] RegisterUserRequestDto request, CancellationToken cancellationToken)
     {
         await _userRepository.CreateAsync(new()
         {
-            FirstName = "TestFirst",
-            Surname = "TestLast",
-            PolicyReferenceNumber = "TestRefNum"
+            FirstName = request.FirstName,
+            Surname = request.Surname,
+            PolicyReferenceNumber = request.PolicyReferenceNumber
         }, cancellationToken);
         await _userRepository.SaveAsync(cancellationToken);
         var savedUsers = await _userRepository.GetAllAsync(cancellationToken);
