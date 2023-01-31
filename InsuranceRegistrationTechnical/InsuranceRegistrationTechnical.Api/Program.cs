@@ -1,4 +1,6 @@
 using InsuranceRegistrationTechnical.Data.Data;
+using InsuranceRegistrationTechnical.Data.Interfaces;
+using InsuranceRegistrationTechnical.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<RegistrationDatabaseContext>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 

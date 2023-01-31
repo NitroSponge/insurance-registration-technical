@@ -1,5 +1,7 @@
 using InsuranceRegistrationTechnical.Data.Data;
 using InsuranceRegistrationTechnical.Data.Entities;
+using InsuranceRegistrationTechnical.Data.Interfaces;
+using InsuranceRegistrationTechnical.Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,25 +12,25 @@ namespace InsuranceRegistrationTechnical.Api.Controllers;
 public class RegistrationController : ControllerBase
 {
     private readonly ILogger<RegistrationController> _logger;
-    private readonly RegistrationDatabaseContext _databaseContext;
+    private readonly IUserRepository _userRepository;
 
-    public RegistrationController(ILogger<RegistrationController> logger, RegistrationDatabaseContext databaseContext)
+    public RegistrationController(ILogger<RegistrationController> logger, IUserRepository userRepository)
     {
         _logger = logger;
-        _databaseContext = databaseContext;
+        _userRepository = userRepository;
     }
 
     [HttpPost(Name = "PostCreateUserRequest")]
     public async Task<int> PostCreateUserRequest(CancellationToken cancellationToken)
     {
-        _databaseContext.Add<UserEntity>(new()
+        await _userRepository.CreateAsync(new()
         {
             FirstName = "TestFirst",
             Surname = "TestLast",
             PolicyReferenceNumber = "TestRefNum"
-        });
-        await _databaseContext.SaveChangesAsync(cancellationToken);
-        var savedUsers = await _databaseContext.Users.ToListAsync(cancellationToken);
-        return savedUsers.Count;
+        }, cancellationToken);
+        await _userRepository.SaveAsync(cancellationToken);
+        var savedUsers = await _userRepository.GetAllAsync(cancellationToken);
+        return savedUsers.Count();
     }
 }
