@@ -89,7 +89,7 @@ public class UserRegistrationService : IUserRegistrationService
         }
         return databaseUpdateSuccess ?
             ServiceResult.SuccessFromValue(savedUser.Id)
-            : ServiceResult.FailureFromError<int>("Database error, please contact administrator if persists.");
+            : ServiceResult.FailureFromError<int>("Database validation error, please contact administrator if persists.");
     }
 
     private static bool ValidateName(string name)

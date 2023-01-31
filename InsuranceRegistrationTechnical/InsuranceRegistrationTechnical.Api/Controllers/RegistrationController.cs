@@ -25,10 +25,17 @@ public class RegistrationController : ControllerBase
     [HttpPost(Name = "PostRegisterUserRequest")]
     public async Task<ActionResult<int>> PostRegisterUserRequest([FromBody] RegisterUserRequestDto request, CancellationToken cancellationToken)
     {
-        // Please note I have assumed from the technical description provided the response requires returning ONLY a customer ID as an integer.
-        // Perhaps a more usual response would be a Json object with a CustomerId field and optional array of errors, in real life I would clarify the requirement.
-
-        var result = await _userRegistrationService.RegisterUserAsync(_mapper.Map<RegisterUserRequestModel>(request), cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        try
+        {
+            // Please note I have assumed from the technical description provided the response requires returning ONLY a customer ID as an integer.
+            // Perhaps a more usual response would be a Json object with a CustomerId field and optional array of errors, in real life I would clarify the requirement.
+            var result = await _userRegistrationService.RegisterUserAsync(_mapper.Map<RegisterUserRequestModel>(request), cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
     }
 }
