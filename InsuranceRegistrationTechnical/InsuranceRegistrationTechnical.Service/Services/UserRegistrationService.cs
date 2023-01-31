@@ -1,8 +1,10 @@
-﻿using InsuranceRegistrationTechnical.Data.Interfaces;
+﻿using InsuranceRegistrationTechnical.Data.Entities;
+using InsuranceRegistrationTechnical.Data.Interfaces;
 using InsuranceRegistrationTechnical.Service.Framework;
 using InsuranceRegistrationTechnical.Service.Interfaces;
 using InsuranceRegistrationTechnical.Service.Models;
 using InsuranceRegistrationTechnical.Service.Tools;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
@@ -28,7 +30,7 @@ public class UserRegistrationService : IUserRegistrationService
         var validationResult = ValidateRegisterUserRequestModel(request);
         if (validationResult.IsValid)
         {
-            var savedUser = await _userRepository.CreateAsync(new()
+            result = await SaveNewUserAsync(new()
             {
                 FirstName = request.FirstName,
                 Surname = request.Surname,
@@ -36,8 +38,6 @@ public class UserRegistrationService : IUserRegistrationService
                 DateOfBirth = request.DateOfBirth,
                 Email = request.Email
             }, cancellationToken);
-            await _userRepository.SaveAsync(cancellationToken);
-            result = ServiceResult.SuccessFromValue(savedUser.Id);
         }
         else
         {
@@ -71,6 +71,25 @@ public class UserRegistrationService : IUserRegistrationService
             validationResult.AddError("Date of Birth or Email must be provided.");
         }
         return validationResult;
+    }
+
+    private async Task<ServiceResult<int>> SaveNewUserAsync(UserEntity userEntity, CancellationToken cancellationToken)
+    {
+        var savedUser = await _userRepository.CreateAsync(userEntity, cancellationToken);
+        bool databaseUpdateSuccess;
+        try
+        {
+            await _userRepository.SaveAsync(cancellationToken);
+            databaseUpdateSuccess = true;
+        }
+        // DataAccessLayer bleeding here, would need to return custom errors from repositories to fix.
+        catch (DbUpdateException)
+        {
+            databaseUpdateSuccess = false;
+        }
+        return databaseUpdateSuccess ?
+            ServiceResult.SuccessFromValue(savedUser.Id)
+            : ServiceResult.FailureFromError<int>("Database error, please contact administrator if persists.");
     }
 
     private static bool ValidateName(string name)

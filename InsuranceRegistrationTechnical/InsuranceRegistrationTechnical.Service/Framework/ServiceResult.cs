@@ -7,6 +7,9 @@ public class ServiceResult
 
     public static ServiceResult<TValue> FailureFromErrors<TValue>(IEnumerable<string> errors)
         => ServiceResult<TValue>.FailureFromErrors(errors);
+
+    public static ServiceResult<TValue> FailureFromError<TValue>(string error)
+        => ServiceResult<TValue>.FailureFromErrors(new List<string> { error });
 }
 
 public class ServiceResult<TValue> : ServiceResult
