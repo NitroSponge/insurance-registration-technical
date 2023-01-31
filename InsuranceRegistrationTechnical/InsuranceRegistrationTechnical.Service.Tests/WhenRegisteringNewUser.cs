@@ -28,6 +28,9 @@ public class WhenRegisteringNewUser
         MockLogger = new Mock<ILogger<UserRegistrationService>>();
         MockUserRepository = new Mock<IUserRepository>();
         MockAgeRestrictionEvaluator = new Mock<IAgeRestrictionEvaluator>();
+        MockAgeRestrictionEvaluator
+            .Setup(x => x.IsOverAgeRestriction(default))
+            .Returns(true);
         var options = Options.Create(new UserRegistrationServiceOptions());
         Service = new UserRegistrationService(MockLogger.Object, MockUserRepository.Object, MockAgeRestrictionEvaluator.Object, options);
         Request = null!;
