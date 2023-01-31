@@ -1,7 +1,8 @@
 ﻿using InsuranceRegistrationTechnical.Service.Models;
+using InsuranceRegistrationTechnical.Service.Tools;
 
 namespace InsuranceRegistrationTechnical.Service.Interfaces;
 public interface IUserRegistrationService
 {
-    Task<int?> RegisterUserAsync(RegisterUserRequestModel request, CancellationToken cancellationToken);
+    Task<ServiceResult<int>> RegisterUserAsync(RegisterUserRequestModel request, CancellationToken cancellationToken);
 }

@@ -1,14 +1,9 @@
 using AutoMapper;
 using InsuranceRegistrationTechnical.Api.Dtos;
-using InsuranceRegistrationTechnical.Data.Data;
-using InsuranceRegistrationTechnical.Data.Entities;
-using InsuranceRegistrationTechnical.Data.Interfaces;
-using InsuranceRegistrationTechnical.Data.Repositories;
 using InsuranceRegistrationTechnical.Service.Interfaces;
 using InsuranceRegistrationTechnical.Service.Models;
-using InsuranceRegistrationTechnical.Service.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace InsuranceRegistrationTechnical.Api.Controllers;
 
@@ -30,7 +25,10 @@ public class RegistrationController : ControllerBase
     [HttpPost(Name = "PostRegisterUserRequest")]
     public async Task<ActionResult<int>> PostRegisterUserRequest([FromBody] RegisterUserRequestDto request, CancellationToken cancellationToken)
     {
-        var customerId = await _userRegistrationService.RegisterUserAsync(_mapper.Map<RegisterUserRequestModel>(request), cancellationToken);
-        return customerId.HasValue ? Ok(customerId.Value) : BadRequest("Invalid request");
+        // Please note I have assumed from the technical description provided the response requires returning ONLY a customer ID as an integer.
+        // Perhaps a more usual response would be a Json object with a CustomerId field and optional array of errors, in real life I would clarify the requirement.
+
+        var result = await _userRegistrationService.RegisterUserAsync(_mapper.Map<RegisterUserRequestModel>(request), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
     }
 }

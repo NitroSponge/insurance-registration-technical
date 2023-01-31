@@ -1,6 +1,8 @@
 ﻿using InsuranceRegistrationTechnical.Data.Interfaces;
+using InsuranceRegistrationTechnical.Service.Framework;
 using InsuranceRegistrationTechnical.Service.Interfaces;
 using InsuranceRegistrationTechnical.Service.Models;
+using InsuranceRegistrationTechnical.Service.Tools;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
@@ -20,52 +22,55 @@ public class UserRegistrationService : IUserRegistrationService
         _validEmailRegex = new Regex(@"[a-zA-Z0-9]{3,}@[a-zA-Z0-9]{2,}(.com|.co.uk)");
     }
 
-    public async Task<int?> RegisterUserAsync(RegisterUserRequestModel request, CancellationToken cancellationToken)
+    public async Task<ServiceResult<int>> RegisterUserAsync(RegisterUserRequestModel request, CancellationToken cancellationToken)
     {
-        int? result;
-        var isValid = ValidateRegisterUserRequestModel(request);
-        if (isValid)
+        ServiceResult<int> result;
+        var validationResult = ValidateRegisterUserRequestModel(request);
+        if (validationResult.IsValid)
         {
             var savedUser = await _userRepository.CreateAsync(new()
             {
                 FirstName = request.FirstName,
                 Surname = request.Surname,
-                PolicyReferenceNumber = request.PolicyReferenceNumber
+                PolicyReferenceNumber = request.PolicyReferenceNumber,
+                DateOfBirth = request.DateOfBirth,
+                Email = request.Email
             }, cancellationToken);
             await _userRepository.SaveAsync(cancellationToken);
-            result = savedUser.Id;
+            result = ServiceResult.SuccessFromValue(savedUser.Id);
         }
         else
         {
-            result = 0;
+            result = ServiceResult.FailureFromErrors<int>(validationResult.Errors);
         }
+        
         return result;
     }
 
-    private bool ValidateRegisterUserRequestModel(RegisterUserRequestModel request)
+    private ValidationResult ValidateRegisterUserRequestModel(RegisterUserRequestModel request)
     {
-        var isValid = true;
+        var validationResult = new ValidationResult();
         if (ValidateName(request.FirstName))
         {
-            isValid = false;
+            validationResult.AddError("First Name must be between 3 and 50 characters.");
         }
         if (ValidateName(request.Surname))
         {
-            isValid = false;
+            validationResult.AddError("Surname must be between 3 and 50 characters.");
         }
         if (request.PolicyReferenceNumber != null && _validPolicyRegistrationNumberRegex.IsMatch(request.PolicyReferenceNumber) == false)
         {
-            isValid = false;
+            validationResult.AddError("Policy Reference Number must be of form XX-000000 where XX is an uppercase alpha character and 0 is a digit.");
         }
         if (request.Email != null && _validEmailRegex.IsMatch(request.Email) == false)
         {
-            isValid = false;
+            validationResult.AddError("Email must have at least four alpha numeric characters before the @ sign, two alpha numeric characters after the @ sign excluding domain and must be of domain .com or .co.uk");
         }
-        if (request.PolicyReferenceNumber == null && request.Email == null)
+        if (request.DateOfBirth == null && request.Email == null)
         {
-            isValid = false;
+            validationResult.AddError("Date of Birth or Email must be provided.");
         }
-        return isValid;
+        return validationResult;
     }
 
     private static bool ValidateName(string name)
