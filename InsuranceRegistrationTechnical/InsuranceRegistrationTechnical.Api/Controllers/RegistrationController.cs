@@ -1,8 +1,12 @@
+using AutoMapper;
 using InsuranceRegistrationTechnical.Api.Dtos;
 using InsuranceRegistrationTechnical.Data.Data;
 using InsuranceRegistrationTechnical.Data.Entities;
 using InsuranceRegistrationTechnical.Data.Interfaces;
 using InsuranceRegistrationTechnical.Data.Repositories;
+using InsuranceRegistrationTechnical.Service.Interfaces;
+using InsuranceRegistrationTechnical.Service.Models;
+using InsuranceRegistrationTechnical.Service.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,25 +17,19 @@ namespace InsuranceRegistrationTechnical.Api.Controllers;
 public class RegistrationController : ControllerBase
 {
     private readonly ILogger<RegistrationController> _logger;
-    private readonly IUserRepository _userRepository;
+    private readonly IUserRegistrationService _userRegistrationService;
+    private readonly IMapper _mapper;
 
-    public RegistrationController(ILogger<RegistrationController> logger, IUserRepository userRepository)
+    public RegistrationController(ILogger<RegistrationController> logger, IUserRegistrationService userRegistrationService, IMapper mapper)
     {
         _logger = logger;
-        _userRepository = userRepository;
+        _userRegistrationService = userRegistrationService;
+        _mapper = mapper;
     }
 
     [HttpPost(Name = "PostRegisterUserRequest")]
     public async Task<int> PostRegisterUserRequest([FromBody] RegisterUserRequestDto request, CancellationToken cancellationToken)
     {
-        await _userRepository.CreateAsync(new()
-        {
-            FirstName = request.FirstName,
-            Surname = request.Surname,
-            PolicyReferenceNumber = request.PolicyReferenceNumber
-        }, cancellationToken);
-        await _userRepository.SaveAsync(cancellationToken);
-        var savedUsers = await _userRepository.GetAllAsync(cancellationToken);
-        return savedUsers.Count();
+        return await _userRegistrationService.RegisterUserAsync(_mapper.Map<RegisterUserRequestModel>(request), cancellationToken);
     }
 }
