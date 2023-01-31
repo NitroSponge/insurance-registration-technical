@@ -28,8 +28,9 @@ public class RegistrationController : ControllerBase
     }
 
     [HttpPost(Name = "PostRegisterUserRequest")]
-    public async Task<int> PostRegisterUserRequest([FromBody] RegisterUserRequestDto request, CancellationToken cancellationToken)
+    public async Task<ActionResult<int>> PostRegisterUserRequest([FromBody] RegisterUserRequestDto request, CancellationToken cancellationToken)
     {
-        return await _userRegistrationService.RegisterUserAsync(_mapper.Map<RegisterUserRequestModel>(request), cancellationToken);
+        var customerId = await _userRegistrationService.RegisterUserAsync(_mapper.Map<RegisterUserRequestModel>(request), cancellationToken);
+        return customerId.HasValue ? Ok(customerId.Value) : BadRequest("Invalid request");
     }
 }

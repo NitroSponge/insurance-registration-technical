@@ -3,5 +3,5 @@
 namespace InsuranceRegistrationTechnical.Service.Interfaces;
 public interface IUserRegistrationService
 {
-    Task<int> RegisterUserAsync(RegisterUserRequestModel request, CancellationToken cancellationToken);
+    Task<int?> RegisterUserAsync(RegisterUserRequestModel request, CancellationToken cancellationToken);
 }
